@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Puzzle\Domain\Entity\PuzzleProgress" table="puzzle_progress">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="IDENTITY"/>
+        </id>
+
+        <field name="userUuid" type="user_id" column="user_uuid" length="36"/>
+        <field name="puzzleUuid" type="puzzle_id" column="puzzle_uuid" length="36"/>
+        <field name="currentFragment" type="integer" column="current_fragment"/>
+        <field name="piecesPlaced" type="integer" column="pieces_placed"/>
+        <field name="timeSpentSeconds" type="integer" column="time_spent_seconds"/>
+        <field name="completed" type="boolean" column="completed"/>
+        <field name="startedAt" type="datetime_immutable" column="started_at"/>
+        <field name="completedAt" type="datetime_immutable" column="completed_at" nullable="true"/>
+        <field name="updatedAt" type="datetime_immutable" column="updated_at"/>
+
+        <unique-constraints>
+            <unique-constraint columns="user_uuid,puzzle_uuid" name="unique_user_puzzle"/>
+        </unique-constraints>
+
+    </entity>
+
+</doctrine-mapping>

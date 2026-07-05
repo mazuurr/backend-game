@@ -1,0 +1,9 @@
+<?php
+if (!isset($params['escape']) || $params['escape'] !== false) {
+    $message = h($message);
+}
+?>
+<div class="alert alert-info alert-dismissible">
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <i class="icon fa fa-info"></i> <?= $message ?>
+</div>

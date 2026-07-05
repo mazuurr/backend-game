@@ -1,0 +1,1174 @@
+{
+  "info": {
+    "name": "Puzzel API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8085",
+      "type": "string"
+    },
+    {
+      "key": "api_admin_token",
+      "value": "sDrStXKqyduZ3y5OM7SMVXetWVEms0t576s4JGhYWhb5jJ3uzyKBgQPDaHlYAs7s6zcf7eqaTZGtHkzTEALX0FTPrD0xuI",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_uuid",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "group_uuid",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "puzzle_uuid",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "campaign_uuid",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invitation_uuid",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jan@example.com\",\n  \"password\": \"pass1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('jwt_token', json.token);",
+                  "}",
+                  "if (json.uuid) {",
+                  "    pm.collectionVariables.set('user_uuid', json.uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jan@example.com\",\n  \"password\": \"pass1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            }
+          }
+        },
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jan@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/password-reset/request",
+              "host": ["{{base_url}}"],
+              "path": ["api", "password-reset", "request"]
+            }
+          }
+        },
+        {
+          "name": "Confirm Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"RESET_TOKEN_FROM_EMAIL\",\n  \"password\": \"newpassword123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/password-reset/confirm",
+              "host": ["{{base_url}}"],
+              "path": ["api", "password-reset", "confirm"]
+            }
+          }
+        },
+        {
+          "name": "Activate Account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/activate?token=ACTIVATION_TOKEN_HERE",
+              "host": ["{{base_url}}"],
+              "path": ["api", "activate"],
+              "query": [
+                { "key": "token", "value": "ACTIVATION_TOKEN_HERE" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User (JWT)",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nowa_nazwa\",\n  \"email\": \"nowy@example.com\",\n  \"password\": \"nowehaslo123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "me"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"oldpassword\",\n  \"new_password\": \"newpassword123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/me/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "me", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Deactivate My Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/me/deactivate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "me", "deactivate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin – Users (X-API-TOKEN)",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "search", "value": "", "description": "Szukaj po username lub email", "disabled": true },
+                { "key": "active", "value": "true", "description": "Filtruj po aktywności (true/false)", "disabled": true },
+                { "key": "premium", "value": "true", "description": "Filtruj po premium (true/false)", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{user_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "{{user_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"jan_kowalski\",\n  \"email\": \"jan@example.com\",\n  \"password\": \"pass1234\",\n  \"premium\": false,\n  \"active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nowa_nazwa\",\n  \"email\": \"nowy@example.com\",\n  \"password\": \"nowehaslo123\",\n  \"premium\": true,\n  \"active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{user_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "{{user_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{user_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "{{user_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Send Password Reset Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{user_uuid}}/send-password-reset",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "{{user_uuid}}", "send-password-reset"]
+            }
+          }
+        },
+        {
+          "name": "Reset User Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"newpassword123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{user_uuid}}/reset-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "{{user_uuid}}", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "Activate User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{user_uuid}}/activate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "{{user_uuid}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Deactivate User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{user_uuid}}/deactivate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "{{user_uuid}}", "deactivate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User – Groups (JWT)",
+      "item": [
+        {
+          "name": "List Groups",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups",
+              "host": ["{{base_url}}"],
+              "path": ["api", "groups"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "search", "value": "", "description": "Szukaj po nazwie grupy", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Group",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups/{{group_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "groups", "{{group_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Moja grupa\",\n  \"description\": \"Opis grupy\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/groups",
+              "host": ["{{base_url}}"],
+              "path": ["api", "groups"]
+            }
+          }
+        },
+        {
+          "name": "Join Group (send request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups/{{group_uuid}}/join",
+              "host": ["{{base_url}}"],
+              "path": ["api", "groups", "{{group_uuid}}", "join"]
+            }
+          }
+        },
+        {
+          "name": "Leave Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups/leave",
+              "host": ["{{base_url}}"],
+              "path": ["api", "groups", "leave"]
+            }
+          }
+        },
+        {
+          "name": "Transfer Ownership (owner only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"new_owner_uuid\": \"{{user_uuid}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/groups/{{group_uuid}}/transfer-ownership",
+              "host": ["{{base_url}}"],
+              "path": ["api", "groups", "{{group_uuid}}", "transfer-ownership"]
+            }
+          }
+        },
+        {
+          "name": "Delete Group (owner only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups/{{group_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "groups", "{{group_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Invite User to Group (owner only, pending)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/groups/{{group_uuid}}/invite/{{user_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "groups", "{{group_uuid}}", "invite", "{{user_uuid}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User – Group Invitations (JWT)",
+      "item": [
+        {
+          "name": "My Invitations & Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/invitations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "invitations"]
+            }
+          }
+        },
+        {
+          "name": "Accept Invitation (type=invitation)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/invitations/{{invitation_uuid}}/accept",
+              "host": ["{{base_url}}"],
+              "path": ["api", "invitations", "{{invitation_uuid}}", "accept"]
+            }
+          }
+        },
+        {
+          "name": "Reject Invitation or Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/invitations/{{invitation_uuid}}/reject",
+              "host": ["{{base_url}}"],
+              "path": ["api", "invitations", "{{invitation_uuid}}", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User – Campaigns (JWT)",
+      "item": [
+        {
+          "name": "List Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/campaigns",
+              "host": ["{{base_url}}"],
+              "path": ["api", "campaigns"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "search", "value": "", "description": "Szukaj po nazwie kampanii", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Campaign",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/campaigns/{{campaign_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "campaigns", "{{campaign_uuid}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin – Campaigns (X-API-TOKEN)",
+      "item": [
+        {
+          "name": "List Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/campaigns",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "campaigns"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "search", "value": "", "description": "Szukaj po nazwie kampanii", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Campaign",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.uuid) {",
+                  "    pm.collectionVariables.set('campaign_uuid', json.data.uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/campaigns/{{campaign_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "campaigns", "{{campaign_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Campaign",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.uuid) {",
+                  "    pm.collectionVariables.set('campaign_uuid', json.uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chiński Rok Smoka\",\n  \"description\": \"Kampania z motywem chińskiego nowego roku\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/campaigns",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "campaigns"]
+            }
+          }
+        },
+        {
+          "name": "Update Campaign",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nowa nazwa\",\n  \"description\": \"Nowy opis\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/campaigns/{{campaign_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "campaigns", "{{campaign_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/campaigns/{{campaign_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "campaigns", "{{campaign_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Assign Puzzle to Campaign",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/campaigns/{{campaign_uuid}}/puzzles/{{puzzle_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "campaigns", "{{campaign_uuid}}", "puzzles", "{{puzzle_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Remove Puzzle from Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/campaigns/{{campaign_uuid}}/puzzles/{{puzzle_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "campaigns", "{{campaign_uuid}}", "puzzles", "{{puzzle_uuid}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User – Puzzles (JWT)",
+      "item": [
+        {
+          "name": "List Puzzles",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/puzzles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "puzzles"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "campaign_uuid", "value": "{{campaign_uuid}}", "description": "Filtruj po kampanii", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Puzzle",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/puzzles/{{puzzle_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "puzzles", "{{puzzle_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Puzzle Image",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/puzzles/{{puzzle_uuid}}/image",
+              "host": ["{{base_url}}"],
+              "path": ["api", "puzzles", "{{puzzle_uuid}}", "image"]
+            }
+          }
+        },
+        {
+          "name": "Record Progress",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_fragment\": 1,\n  \"pieces_placed\": 50,\n  \"time_spent_seconds\": 300,\n  \"completed\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/puzzles/{{puzzle_uuid}}/progress",
+              "host": ["{{base_url}}"],
+              "path": ["api", "puzzles", "{{puzzle_uuid}}", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Get My Progress for Puzzle",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/puzzles/{{puzzle_uuid}}/progress",
+              "host": ["{{base_url}}"],
+              "path": ["api", "puzzles", "{{puzzle_uuid}}", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Get All My Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/me/progress",
+              "host": ["{{base_url}}"],
+              "path": ["api", "me", "progress"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin – Puzzles (X-API-TOKEN)",
+      "item": [
+        {
+          "name": "List Puzzles",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/puzzles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "puzzles"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "campaign_uuid", "value": "{{campaign_uuid}}", "description": "Filtruj po kampanii", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Puzzle",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/puzzles/{{puzzle_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "puzzles", "{{puzzle_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Puzzle Image",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/puzzles/{{puzzle_uuid}}/image",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "puzzles", "{{puzzle_uuid}}", "image"]
+            }
+          }
+        },
+        {
+          "name": "Upload Puzzle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.uuid) {",
+                  "    pm.collectionVariables.set('puzzle_uuid', json.uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "" },
+                { "key": "difficulty", "value": "3", "description": "Poziom trudności (liczba całkowita, opcjonalne)", "disabled": true },
+                { "key": "total_pieces", "value": "2000", "description": "Łączna liczba puzzli (np. 1000, 2000), opcjonalne", "disabled": true },
+                { "key": "pieces_per_fragment", "value": "250", "description": "Liczba kawałków na fragment ekranu (np. 100, 200, 250), opcjonalne", "disabled": true },
+                { "key": "pieces_x", "value": "40", "description": "Liczba puzzli w poziomie (opcjonalne)", "disabled": true },
+                { "key": "pieces_y", "value": "50", "description": "Liczba puzzli w pionie (opcjonalne)", "disabled": true }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/puzzles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "puzzles"]
+            }
+          }
+        },
+        {
+          "name": "Update Puzzle",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"difficulty\": 5,\n  \"total_pieces\": 2000,\n  \"pieces_per_fragment\": 250,\n  \"pieces_x\": 40,\n  \"pieces_y\": 50\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/puzzles/{{puzzle_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "puzzles", "{{puzzle_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Puzzle Progress (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/puzzles/{{puzzle_uuid}}/progress",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "puzzles", "{{puzzle_uuid}}", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Delete Puzzle",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/puzzles/{{puzzle_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "puzzles", "{{puzzle_uuid}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin – Groups (X-API-TOKEN)",
+      "item": [
+        {
+          "name": "List Groups",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/groups",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "groups"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "search", "value": "", "description": "Szukaj po nazwie grupy", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Group",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.uuid) {",
+                  "    pm.collectionVariables.set('group_uuid', json.data.uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/groups/{{group_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "groups", "{{group_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Group",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.uuid) {",
+                  "    pm.collectionVariables.set('group_uuid', json.data.uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Administratorzy\",\n  \"description\": \"Grupa administracyjna\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/groups",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "groups"]
+            }
+          }
+        },
+        {
+          "name": "Update Group",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nowa nazwa\",\n  \"description\": \"Nowy opis\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/groups/{{group_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "groups", "{{group_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Group",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/groups/{{group_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "groups", "{{group_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Assign User to Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/groups/{{group_uuid}}/users/{{user_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "groups", "{{group_uuid}}", "users", "{{user_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Remove User from Group",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/groups/{{group_uuid}}/users/{{user_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "groups", "{{group_uuid}}", "users", "{{user_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "List Group Invitations (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/groups/{{group_uuid}}/invitations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "groups", "{{group_uuid}}", "invitations"]
+            }
+          }
+        },
+        {
+          "name": "Accept Invitation (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/invitations/{{invitation_uuid}}/accept",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "invitations", "{{invitation_uuid}}", "accept"]
+            }
+          }
+        },
+        {
+          "name": "Reject Invitation (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/invitations/{{invitation_uuid}}/reject",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "invitations", "{{invitation_uuid}}", "reject"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

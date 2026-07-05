@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Puzzle\Domain\Entity\PuzzleBoardPiece" table="puzzle_board_state">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="IDENTITY"/>
+        </id>
+
+        <field name="sessionUuid" type="puzzle_session_id" column="session_uuid" length="36"/>
+        <field name="pieceIndex" type="integer" column="piece_index"/>
+        <field name="toX" type="integer" column="to_x"/>
+        <field name="toY" type="integer" column="to_y"/>
+        <field name="correct" type="boolean" column="correct"/>
+        <field name="updatedAt" type="datetime_immutable" column="updated_at"/>
+        <field name="lastMoveUuid" type="piece_move_id" column="last_move_uuid" length="36"/>
+
+        <unique-constraints>
+            <unique-constraint columns="session_uuid,piece_index" name="unique_session_piece"/>
+        </unique-constraints>
+
+    </entity>
+
+</doctrine-mapping>

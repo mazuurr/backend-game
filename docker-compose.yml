@@ -1,0 +1,118 @@
+services:
+  app:
+    build: .docker/api
+    container_name: puzzel_back_api
+    ports:
+      - "8085:80"
+    volumes:
+      - ./.docker/api/vhosts:/etc/apache2/sites-enabled
+      - ./.docker/api/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./.docker/api/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+      - ./.docker/api/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./:/var/www
+      - ./storage/puzzles:/var/puzzles
+      - ./logs:/var/log/apache2
+    restart: on-failure
+    networks:
+      - puzzel-back-app
+
+  ws:
+    build: .docker/ws
+    container_name: puzzel_back_ws
+    working_dir: /var/www/api
+    command: php bin/console app:ws:serve
+    ports:
+      - "8086:8080"
+    volumes:
+      - ./:/var/www
+      - ./storage/puzzles:/var/puzzles
+    depends_on:
+      - db
+    restart: on-failure
+    networks:
+      - puzzel-back-app
+
+  crud:
+    image: webdevops/php-apache-dev:8.3
+    container_name: puzzel_back_crud
+    working_dir: /crud
+    volumes:
+      - ./crud:/crud
+      - ./.docker/crud/20-server-custom.conf:/opt/docker/etc/httpd/conf.d/20-server-custom.conf
+      #- ./.docker/crud/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./.docker/crud/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+    ports:
+      - "8084:80"
+    environment:
+      - WEB_DOCUMENT_ROOT=/crud/webroot
+      - PHP_MEMORY_LIMIT=512M
+      - PHP_MAX_EXECUTION_TIME=300
+      - PHP_POST_MAX_SIZE=32M
+      - PHP_UPLOAD_MAX_FILESIZE=32M
+      - DATABASE_URL=mysql://${MYSQL_CRUD_USER}:${MYSQL_CRUD_PASSWORD}@db_crud:3306/puzzel_crud_db
+    depends_on:
+      - db_crud
+    networks:
+      - puzzel-back-app
+
+  db:
+    image: mysql:8.2
+    container_name: puzzel_back_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: puzzel_db
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3308:3306"
+    volumes:
+      - db_back_data_puzzel:/var/lib/mysql
+    networks:
+      - puzzel-back-app
+
+  db_crud:
+    image: mysql:8.2
+    container_name: puzzel_back_db_crud
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_CRUD_ROOT_PASSWORD}
+      MYSQL_DATABASE: puzzel_crud_db
+      MYSQL_USER: ${MYSQL_CRUD_USER}
+      MYSQL_PASSWORD: ${MYSQL_CRUD_PASSWORD}
+    ports:
+      - "3309:3306"
+    volumes:
+      - db_back_data_puzzel_crud:/var/lib/mysql
+    networks:
+      - puzzel-back-app
+
+  mailcatcher:
+    image: schickling/mailcatcher
+    container_name: puzzel_back_mailcatcher
+    ports:
+      - "2080:1080"
+      - "2025:1025"
+    networks:
+      - puzzel-back-app
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: puzzel_back_phpmyadmin
+    restart: always
+    environment:
+      - PMA_ARBITRARY=1
+    ports:
+      - "8090:80"
+    depends_on:
+      - db
+      - db_crud
+    networks:
+      - puzzel-back-app
+
+volumes:
+  db_back_data_puzzel:
+  db_back_data_puzzel_crud:
+
+networks:
+  puzzel-back-app:

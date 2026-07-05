@@ -1,0 +1,125 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # === Bounded Context: Campaign ===
+
+    App\Campaign\:
+        resource: '../src/Campaign/'
+        exclude:
+            - '../src/Campaign/Domain/Entity/'
+            - '../src/Campaign/Domain/ValueObject/'
+            - '../src/Campaign/Domain/Exception/'
+
+    App\Campaign\Domain\Repository\CampaignRepositoryInterface:
+        alias: App\Campaign\Infrastructure\Persistence\Doctrine\Repository\DoctrineCampaignRepository
+
+    # === Bounded Context: Puzzle ===
+
+    App\Puzzle\:
+        resource: '../src/Puzzle/'
+        exclude:
+            - '../src/Puzzle/Domain/Entity/'
+            - '../src/Puzzle/Domain/ValueObject/'
+            - '../src/Puzzle/Domain/Exception/'
+            - '../src/Puzzle/Infrastructure/WebSocket/AuthenticatedClient.php'
+            - '../src/Puzzle/Infrastructure/WebSocket/ConnectionContext.php'
+            - '../src/Puzzle/Infrastructure/WebSocket/AuthenticationFailedException.php'
+
+    App\Puzzle\Domain\Repository\PuzzleRepositoryInterface:
+        alias: App\Puzzle\Infrastructure\Persistence\Doctrine\Repository\DoctrinePuzzleRepository
+
+    App\Puzzle\Domain\Repository\PuzzleSessionRepositoryInterface:
+        alias: App\Puzzle\Infrastructure\Persistence\Doctrine\Repository\DoctrinePuzzleSessionRepository
+
+    App\Puzzle\Domain\Repository\PuzzlePieceMoveRepositoryInterface:
+        alias: App\Puzzle\Infrastructure\Persistence\Doctrine\Repository\DoctrinePuzzlePieceMoveRepository
+
+    App\Puzzle\Domain\Repository\PuzzleBoardPieceRepositoryInterface:
+        alias: App\Puzzle\Infrastructure\Persistence\Doctrine\Repository\DoctrinePuzzleBoardPieceRepository
+
+    App\Puzzle\Application\Storage\PuzzleStorageInterface:
+        alias: App\Puzzle\Infrastructure\Storage\LocalPuzzleStorage
+
+    App\Puzzle\Infrastructure\Storage\LocalPuzzleStorage:
+        arguments:
+            $storagePath: '%env(PUZZLE_STORAGE_PATH)%'
+
+    App\Puzzle\Infrastructure\WebSocket\Command\RunWebSocketServerCommand:
+        arguments:
+            $defaultHost: '%env(WS_HOST)%'
+            $defaultPort: '%env(int:WS_PORT)%'
+
+    # === Bounded Context: Group ===
+
+    App\Group\:
+        resource: '../src/Group/'
+        exclude:
+            - '../src/Group/Domain/Entity/'
+            - '../src/Group/Domain/ValueObject/'
+            - '../src/Group/Domain/Exception/'
+
+    App\Group\Domain\Repository\GroupRepositoryInterface:
+        alias: App\Group\Infrastructure\Persistence\Doctrine\Repository\DoctrineGroupRepository
+
+    # === Bounded Context: User ===
+
+    App\User\:
+        resource: '../src/User/'
+        exclude:
+            - '../src/User/Domain/Entity/'
+            - '../src/User/Domain/ValueObject/'
+            - '../src/User/Domain/Event/'
+            - '../src/User/Domain/Exception/'
+
+    App\Shared\:
+        resource: '../src/Shared/'
+
+    # --- Repository ---
+    App\User\Domain\Repository\UserRepositoryInterface:
+        alias: App\User\Infrastructure\Persistence\Doctrine\Repository\DoctrineUserRepository
+
+    # --- Bus ---
+    App\Shared\Infrastructure\Bus\Command\CommandBusInterface:
+        alias: App\Shared\Infrastructure\Bus\Command\SymfonyCommandBus
+
+    App\Shared\Infrastructure\Bus\Query\QueryBusInterface:
+        alias: App\Shared\Infrastructure\Bus\Query\SymfonyQueryBus
+
+    App\Shared\Infrastructure\Bus\Command\SymfonyCommandBus:
+        arguments:
+            $commandBus: '@command.bus'
+
+    App\Shared\Infrastructure\Bus\Query\SymfonyQueryBus:
+        arguments:
+            $queryBus: '@query.bus'
+
+    # --- Security ---
+    App\User\Infrastructure\Security\ApiTokenAuthenticator:
+        arguments:
+            $apiToken: '%env(API_ADMIN_TOKEN)%'
+
+    App\User\Infrastructure\Security\UserProvider: ~
+
+    # --- Mailer ---
+    App\User\Infrastructure\Mailer\ActivationMailerInterface:
+        alias: App\User\Infrastructure\Mailer\SymfonyActivationMailer
+
+    App\User\Infrastructure\Mailer\SymfonyActivationMailer:
+        arguments:
+            $activationBaseUrl: '%env(ACTIVATION_BASE_URL)%'
+            $fromEmail: '%env(MAILER_FROM)%'
+
+    App\User\Infrastructure\Mailer\PasswordResetMailerInterface:
+        alias: App\User\Infrastructure\Mailer\SymfonyPasswordResetMailer
+
+    App\User\Infrastructure\Mailer\SymfonyPasswordResetMailer:
+        arguments:
+            $passwordResetBaseUrl: '%env(PASSWORD_RESET_BASE_URL)%'
+            $fromEmail: '%env(MAILER_FROM)%'
+
+    # --- Event Listener ---
+    App\User\Infrastructure\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }

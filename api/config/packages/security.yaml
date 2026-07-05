@@ -1,0 +1,40 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        app_user_provider:
+            id: App\User\Infrastructure\Security\UserProvider
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # Publiczne endpointy — bez autoryzacji
+        public:
+            pattern: ^/api/(register|activate|login|password-reset)
+            security: false
+
+        # Admin panel — autoryzacja po tokenie API (X-API-TOKEN)
+        admin:
+            pattern: ^/api/admin
+            stateless: true
+            custom_authenticators:
+                - App\User\Infrastructure\Security\ApiTokenAuthenticator
+
+        # Endpointy użytkownika — autoryzacja JWT
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+            provider: app_user_provider
+
+    access_control:
+        - { path: ^/api/(register|activate|login|password-reset), roles: PUBLIC_ACCESS }
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/me, roles: ROLE_USER }
+        - { path: ^/api/groups, roles: ROLE_USER }
+        - { path: ^/api/puzzles, roles: ROLE_USER }
+        - { path: ^/api/campaigns, roles: ROLE_USER }
+        - { path: ^/api/sessions, roles: ROLE_USER }

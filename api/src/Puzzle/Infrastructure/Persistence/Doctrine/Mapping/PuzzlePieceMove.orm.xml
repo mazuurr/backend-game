@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Puzzle\Domain\Entity\PuzzlePieceMove" table="puzzle_piece_moves">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="IDENTITY"/>
+        </id>
+
+        <field name="uuid" type="piece_move_id" column="uuid" length="36" unique="true"/>
+        <field name="sessionUuid" type="puzzle_session_id" column="session_uuid" length="36"/>
+        <field name="userUuid" type="user_id" column="user_uuid" length="36"/>
+        <field name="puzzleUuid" type="puzzle_id" column="puzzle_uuid" length="36"/>
+        <field name="pieceIndex" type="integer" column="piece_index"/>
+        <field name="toX" type="integer" column="to_x"/>
+        <field name="toY" type="integer" column="to_y"/>
+        <field name="correct" type="boolean" column="correct"/>
+        <field name="seq" type="integer" column="seq"/>
+        <field name="movedAt" type="datetime_immutable" column="moved_at"/>
+
+        <indexes>
+            <index columns="session_uuid,seq" name="idx_move_session_seq"/>
+        </indexes>
+
+    </entity>
+
+</doctrine-mapping>
