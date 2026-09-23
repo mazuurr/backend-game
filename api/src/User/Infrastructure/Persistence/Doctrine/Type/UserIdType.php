@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Persistence\Doctrine\Type;
 
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\StringType;
 

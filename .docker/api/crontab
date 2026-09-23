@@ -1,0 +1,2 @@
+*/15 * * * * cd /var/www/api && php bin/console app:sessions:close-expired >> /var/log/cron-sessions-close-expired.log 2>&1
+0 3 * * * cd /var/www/api && php bin/console app:sessions:purge >> /var/log/cron-sessions-purge.log 2>&1

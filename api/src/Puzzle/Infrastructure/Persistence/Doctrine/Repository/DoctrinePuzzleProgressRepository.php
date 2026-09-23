@@ -7,7 +7,7 @@ namespace App\Puzzle\Infrastructure\Persistence\Doctrine\Repository;
 use App\Puzzle\Domain\Entity\PuzzleProgress;
 use App\Puzzle\Domain\Repository\PuzzleProgressRepositoryInterface;
 use App\Puzzle\Domain\ValueObject\PuzzleId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrinePuzzleProgressRepository implements PuzzleProgressRepositoryInterface

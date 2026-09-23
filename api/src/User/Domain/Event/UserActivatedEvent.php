@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\User\Domain\Event;
 
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 
 final class UserActivatedEvent
 {

@@ -99,44 +99,6 @@
         <?= $this->Form->end() ?>
       </div>
 
-      <?php $assignedCampaignUuid = $puzzle['campaign_uuid'] ?? null; ?>
-      <div class="box box-warning">
-        <div class="box-header with-border"><h3 class="box-title">Kampania</h3></div>
-        <div class="box-body">
-          <?php if ($assignedCampaignUuid): ?>
-            <?php
-              $assignedName = '—';
-              foreach ($campaigns as $c) {
-                  if ($c['uuid'] === $assignedCampaignUuid) { $assignedName = $c['name']; break; }
-              }
-            ?>
-            <p>Przypisano do: <strong><?= h($assignedName) ?></strong></p>
-            <?= $this->Form->postLink(
-              '<i class="fa fa-times"></i> Odepnij od kampanii',
-              ['action' => 'removeCampaign', $puzzle['uuid'], $assignedCampaignUuid],
-              ['class' => 'btn btn-warning btn-sm', 'escape' => false, 'confirm' => 'Odpiąć puzzle od kampanii "' . h($assignedName) . '"?']
-            ) ?>
-          <?php else: ?>
-            <p class="text-muted">Puzzle nie jest przypisane do żadnej kampanii.</p>
-            <?php if (!empty($campaigns)): ?>
-            <?= $this->Form->create(null, ['url' => ['action' => 'assignCampaign', $puzzle['uuid']]]) ?>
-            <div class="input-group">
-              <?= $this->Form->select('campaign_uuid',
-                array_combine(array_column($campaigns, 'uuid'), array_column($campaigns, 'name')),
-                ['class' => 'form-control', 'empty' => '— wybierz kampanię —']
-              ) ?>
-              <span class="input-group-btn">
-                <?= $this->Form->button('<i class="fa fa-link"></i> Przypisz', ['class' => 'btn btn-warning', 'escapeTitle' => false]) ?>
-              </span>
-            </div>
-            <?= $this->Form->end() ?>
-            <?php else: ?>
-            <p class="text-muted"><em>Brak kampanii do przypisania.</em></p>
-            <?php endif; ?>
-          <?php endif; ?>
-        </div>
-      </div>
-
     </div>
     <div class="col-md-7">
       <div class="box box-default">

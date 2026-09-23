@@ -32,7 +32,7 @@ final class GetPuzzleProgressHandler
         $progressList = $this->progressRepository->findByPuzzle($puzzleId);
 
         return array_map(
-            static fn ($progress) => PuzzleProgressDTO::fromEntity($progress, $puzzle->getPiecesCount()),
+            static fn ($progress) => PuzzleProgressDTO::fromEntity($progress, $puzzle->getPiecesPerFragment()),
             $progressList,
         );
     }

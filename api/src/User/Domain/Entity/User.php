@@ -13,8 +13,7 @@ use App\User\Domain\Exception\InvalidCurrentPasswordException;
 use App\User\Domain\Exception\InvalidResetTokenException;
 use App\User\Domain\Exception\UserAlreadyActiveException;
 use App\User\Domain\Exception\UserAlreadyInactiveException;
-use App\Group\Domain\ValueObject\GroupId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use App\User\Domain\ValueObject\Email;
 use App\User\Domain\ValueObject\Username;
 use App\User\Domain\ValueObject\HashedPassword;
@@ -27,11 +26,9 @@ class User
     private Username $username;
     private Email $email;
     private HashedPassword $password;
-    private bool $premium;
     private bool $active;
     private ?ActivationToken $activationToken;
     private ?\DateTimeImmutable $tokenExpiresAt;
-    private ?GroupId $groupId;
     private ?string $resetToken;
     private ?\DateTimeImmutable $resetTokenExpiresAt;
     private \DateTimeImmutable $createdAt;
@@ -45,7 +42,6 @@ class User
         Username $username,
         Email $email,
         HashedPassword $password,
-        bool $premium,
         bool $active,
         ?ActivationToken $activationToken,
         ?\DateTimeImmutable $tokenExpiresAt,
@@ -54,21 +50,15 @@ class User
         $this->username = $username;
         $this->email = $email;
         $this->password = $password;
-        $this->premium = $premium;
         $this->active = $active;
         $this->activationToken = $activationToken;
         $this->tokenExpiresAt = $tokenExpiresAt;
-        $this->groupId = null;
         $this->resetToken = null;
         $this->resetTokenExpiresAt = null;
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = null;
     }
 
-    /**
-     * Factory: rejestracja z aplikacji mobilnej (bez autoryzacji).
-     * Użytkownik nieaktywny, generowany token aktywacyjny.
-     */
     public static function registerFromApp(
         UserId $uuid,
         Email $email,
@@ -83,7 +73,6 @@ class User
             username: $username,
             email: $email,
             password: $password,
-            premium: false,
             active: false,
             activationToken: $activationToken,
             tokenExpiresAt: $tokenExpiresAt,
@@ -94,16 +83,11 @@ class User
         return $user;
     }
 
-    /**
-     * Factory: tworzenie przez admina (po tokenie API).
-     * Można ustawić wszystkie pola.
-     */
     public static function createByAdmin(
         UserId $uuid,
         Username $username,
         Email $email,
         HashedPassword $password,
-        bool $premium,
         bool $active,
     ): self {
         return new self(
@@ -111,21 +95,16 @@ class User
             username: $username,
             email: $email,
             password: $password,
-            premium: $premium,
             active: $active,
             activationToken: null,
             tokenExpiresAt: null,
         );
     }
 
-    /**
-     * Edycja przez admina — może zmienić wszystko.
-     */
     public function updateByAdmin(
         ?Username $username,
         ?Email $email,
         ?HashedPassword $password,
-        ?bool $premium,
         ?bool $active,
     ): void {
         if ($username !== null) {
@@ -137,18 +116,12 @@ class User
         if ($password !== null) {
             $this->password = $password;
         }
-        if ($premium !== null) {
-            $this->premium = $premium;
-        }
         if ($active !== null) {
             $this->active = $active;
         }
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    /**
-     * Edycja przez samego użytkownika (JWT) — ograniczone pola.
-     */
     public function updateBySelf(
         ?Username $username,
         ?Email $email,
@@ -166,9 +139,6 @@ class User
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    /**
-     * Aktywacja przez link z maila.
-     */
     public function activateByToken(string $token): void
     {
         if ($this->active) {
@@ -223,21 +193,6 @@ class User
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function assignToGroup(GroupId $groupId): void
-    {
-        $this->groupId = $groupId;
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function removeFromGroup(): void
-    {
-        $this->groupId = null;
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    /**
-     * Dezaktywacja (JWT = siebie, token = dowolnego).
-     */
     public function activateByAdmin(): void
     {
         if ($this->active) {
@@ -260,8 +215,6 @@ class User
 
         $this->recordEvent(new UserDeactivatedEvent($this->uuid));
     }
-
-    // --- Gettery ---
 
     public function getId(): int
     {
@@ -288,19 +241,9 @@ class User
         return $this->password;
     }
 
-    public function isPremium(): bool
-    {
-        return $this->premium;
-    }
-
     public function isActive(): bool
     {
         return $this->active;
-    }
-
-    public function getGroupId(): ?GroupId
-    {
-        return $this->groupId;
     }
 
     public function getResetToken(): ?string

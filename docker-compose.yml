@@ -9,9 +9,14 @@ services:
       - ./.docker/api/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
       - ./.docker/api/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
       - ./.docker/api/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./.docker/api/crontab:/etc/cron.d/puzzle-cron
       - ./:/var/www
       - ./storage/puzzles:/var/puzzles
       - ./logs:/var/log/apache2
+    environment:
+      - DATABASE_URL=mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}?serverVersion=8.2
+    depends_on:
+      - db
     restart: on-failure
     networks:
       - puzzel-back-app
@@ -26,6 +31,8 @@ services:
     volumes:
       - ./:/var/www
       - ./storage/puzzles:/var/puzzles
+    environment:
+      - DATABASE_URL=mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}?serverVersion=8.2
     depends_on:
       - db
     restart: on-failure
@@ -41,15 +48,18 @@ services:
       - ./.docker/crud/20-server-custom.conf:/opt/docker/etc/httpd/conf.d/20-server-custom.conf
       #- ./.docker/crud/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
       - ./.docker/crud/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+      - ./.docker/crud/entrypoint.d/10-migrate.sh:/opt/docker/provision/entrypoint.d/10-migrate.sh
     ports:
       - "8084:80"
     environment:
       - WEB_DOCUMENT_ROOT=/crud/webroot
+      - DEBUG=false
       - PHP_MEMORY_LIMIT=512M
       - PHP_MAX_EXECUTION_TIME=300
       - PHP_POST_MAX_SIZE=32M
       - PHP_UPLOAD_MAX_FILESIZE=32M
-      - DATABASE_URL=mysql://${MYSQL_CRUD_USER}:${MYSQL_CRUD_PASSWORD}@db_crud:3306/puzzel_crud_db
+      - DATABASE_URL=mysql://${DB_CRUD_USER}:${DB_CRUD_PASSWORD}@db_crud:3306/${DB_CRUD_NAME}
+      - API_URL=${API_URL}
     depends_on:
       - db_crud
     networks:
@@ -60,10 +70,10 @@ services:
     container_name: puzzel_back_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: puzzel_db
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3308:3306"
     volumes:
@@ -76,10 +86,10 @@ services:
     container_name: puzzel_back_db_crud
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_CRUD_ROOT_PASSWORD}
-      MYSQL_DATABASE: puzzel_crud_db
-      MYSQL_USER: ${MYSQL_CRUD_USER}
-      MYSQL_PASSWORD: ${MYSQL_CRUD_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_CRUD_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_CRUD_NAME}
+      MYSQL_USER: ${DB_CRUD_USER}
+      MYSQL_PASSWORD: ${DB_CRUD_PASSWORD}
     ports:
       - "3309:3306"
     volumes:

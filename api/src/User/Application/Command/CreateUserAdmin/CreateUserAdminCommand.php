@@ -10,7 +10,6 @@ final class CreateUserAdminCommand
         public readonly string $username,
         public readonly string $email,
         public readonly string $password,
-        public readonly bool $premium = false,
         public readonly bool $active = true,
     ) {}
 }

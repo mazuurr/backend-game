@@ -8,7 +8,7 @@ use App\Puzzle\Domain\Exception\NotSessionOwnerException;
 use App\Puzzle\Domain\Exception\PuzzleSessionNotFoundException;
 use App\Puzzle\Domain\Repository\PuzzleSessionRepositoryInterface;
 use App\Puzzle\Domain\ValueObject\PuzzleSessionId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'command.bus')]

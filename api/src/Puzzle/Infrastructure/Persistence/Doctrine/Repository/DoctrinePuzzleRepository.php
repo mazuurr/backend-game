@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Puzzle\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Campaign\Domain\ValueObject\CampaignId;
 use App\Puzzle\Domain\Entity\Puzzle;
 use App\Puzzle\Domain\Repository\PuzzleRepositoryInterface;
 use App\Puzzle\Domain\ValueObject\PuzzleId;
@@ -51,9 +50,9 @@ final class DoctrinePuzzleRepository implements PuzzleRepositoryInterface
     }
 
     /** @return Puzzle[] */
-    public function findPaginated(int $offset, int $limit, ?string $campaignUuid): array
+    public function findPaginated(int $offset, int $limit): array
     {
-        $qb = $this->buildFilterQuery('p', $campaignUuid)
+        $qb = $this->buildFilterQuery('p')
             ->orderBy('p.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
@@ -61,38 +60,20 @@ final class DoctrinePuzzleRepository implements PuzzleRepositoryInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function countFiltered(?string $campaignUuid): int
+    public function countFiltered(): int
     {
-        $qb = $this->buildFilterQuery('p', $campaignUuid)
+        $qb = $this->buildFilterQuery('p')
             ->select('COUNT(p.id)');
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
-    private function buildFilterQuery(string $alias, ?string $campaignUuid): \Doctrine\ORM\QueryBuilder
+    private function buildFilterQuery(string $alias): \Doctrine\ORM\QueryBuilder
     {
         $qb = $this->em->createQueryBuilder()
             ->select($alias)
             ->from(Puzzle::class, $alias);
 
-        if ($campaignUuid !== null && $campaignUuid !== '') {
-            $qb->andWhere("$alias.campaignUuid = :campaignUuid")
-                ->setParameter('campaignUuid', $campaignUuid);
-        }
-
         return $qb;
-    }
-
-    /** @return Puzzle[] */
-    public function findByCampaignId(CampaignId $campaignId): array
-    {
-        return $this->em->createQueryBuilder()
-            ->select('p')
-            ->from(Puzzle::class, 'p')
-            ->where('p.campaignUuid = :campaignId')
-            ->setParameter('campaignId', $campaignId->value())
-            ->orderBy('p.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
     }
 }

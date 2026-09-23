@@ -43,6 +43,16 @@
       "key": "invitation_uuid",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "session_uuid",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ws_url",
+      "value": "ws://localhost:8086",
+      "type": "string"
     }
   ],
   "item": [
@@ -1165,6 +1175,278 @@
               "raw": "{{base_url}}/api/admin/invitations/{{invitation_uuid}}/reject",
               "host": ["{{base_url}}"],
               "path": ["api", "admin", "invitations", "{{invitation_uuid}}", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin – Sessions (X-API-TOKEN)",
+      "item": [
+        {
+          "name": "List Sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.length && json.data[0].uuid) {",
+                  "    pm.collectionVariables.set('session_uuid', json.data[0].uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/sessions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "sessions"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "status", "value": "open", "description": "Filtruj po statusie (open/closed)", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Session (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/sessions/{{session_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "sessions", "{{session_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Close Session (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/sessions/{{session_uuid}}/close",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "sessions", "{{session_uuid}}", "close"]
+            }
+          }
+        },
+        {
+          "name": "Get Session Stats (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-TOKEN", "value": "{{api_admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/sessions/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "sessions", "stats"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User – Sessions (JWT)",
+      "description": "Współdzielone sesje układania puzzli. `session_uuid` z odpowiedzi \"Start Session\" jest wykorzystywany przy dołączaniu do pokoju przez WebSocket (folder \"WebSocket – Puzzle Board\").",
+      "item": [
+        {
+          "name": "Start Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.uuid) {",
+                  "    pm.collectionVariables.set('session_uuid', json.data.uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visibility\": \"public\",\n  \"group_uuid\": null,\n  \"mode\": \"individual\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Tworzy nową sesję dla puzzla. `visibility`: \"public\" lub \"group\". Dla \"group\" wymagane `group_uuid`. `mode`: \"individual\" (domyślnie) lub \"shared\" — deklaracja użytkownika, czy sesja jest indywidualna czy wspólna (niezależna od `visibility`).",
+            "url": {
+              "raw": "{{base_url}}/api/puzzles/{{puzzle_uuid}}/sessions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "puzzles", "{{puzzle_uuid}}", "sessions"]
+            }
+          }
+        },
+        {
+          "name": "List Open Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sessions"]
+            }
+          }
+        },
+        {
+          "name": "My Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions/mine",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sessions", "mine"],
+              "query": [
+                { "key": "mode", "value": "individual", "description": "Filtruj po trybie (individual/shared)", "disabled": true },
+                { "key": "status", "value": "open", "description": "Filtruj po statusie (open/closed)", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "My Session Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions/stats/mine",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sessions", "stats", "mine"],
+              "query": [
+                { "key": "puzzle_uuid", "value": "", "description": "Filtruj po konkretnym puzzlu", "disabled": true },
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Session",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions/{{session_uuid}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sessions", "{{session_uuid}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Session Board",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions/{{session_uuid}}/board",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sessions", "{{session_uuid}}", "board"]
+            }
+          }
+        },
+        {
+          "name": "Get Session Moves",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions/{{session_uuid}}/moves",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sessions", "{{session_uuid}}", "moves"]
+            }
+          }
+        },
+        {
+          "name": "Get Session Contributions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions/{{session_uuid}}/contributions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sessions", "{{session_uuid}}", "contributions"]
+            },
+            "description": "Kto ile ułożył w sesji + ogólny postęp. Liczone z logu `puzzle_piece_moves`.\n\nPola per gracz:\n- `correct_count` — elementy **aktualnie** poprawnie ułożone (ostatni ruch danego pola).\n- `total_moves` — wszystkie upuszczenia gracza.\n- `correct_moves` — upuszczenia oznaczone jako poprawne (historycznie).\n\n**Odpowiedź:**\n```json\n{\n  \"data\": {\n    \"total\": 510,\n    \"correct\": 274,\n    \"leader\": { \"user_uuid\": \"...\", \"username\": \"kamil\", \"correct_count\": 274, \"total_moves\": 1552, \"correct_moves\": 274 },\n    \"contributions\": [\n      { \"user_uuid\": \"...\", \"username\": \"kamil\", \"correct_count\": 274, \"total_moves\": 1552, \"correct_moves\": 274 }\n    ]\n  }\n}\n```\n`leader` to pierwszy z rankingu (lub `null`). `contributions` zawiera każdego kto wykonał ruch, posortowane malejąco po `correct_count`."
+          }
+        },
+        {
+          "name": "Close Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions/{{session_uuid}}/close",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sessions", "{{session_uuid}}", "close"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "WebSocket – Puzzle Board (JWT)",
+      "description": "Serwer WebSocket współdzielonej planszy puzzli (Workerman).\n\n**Endpoint:** `{{ws_url}}?token={{jwt_token}}`\n\n**Uwierzytelnianie (handshake):** JWT przekazywany jako parametr zapytania `?token=` LUB nagłówek `Authorization: Bearer <jwt>`. Token jest weryfikowany tym samym kluczem co API. Po udanym handshake serwer wysyła `welcome`.\n\n**Wymagania wstępne:** wykonaj \"Login\" (ustawia `jwt_token`) oraz \"User – Sessions → Start Session\" (ustawia `session_uuid`).\n\n---\n\n### Wiadomości KLIENT → SERWER (JSON)\n\nDołączenie do pokoju sesji:\n```json\n{ \"type\": \"join\", \"sessionUuid\": \"{{session_uuid}}\" }\n```\n\nRuch elementu w trakcie przeciągania (ulotne, tylko relay do innych – NIE zapisywane):\n```json\n{ \"type\": \"drag\", \"pieceIndex\": 0, \"x\": 100, \"y\": 200 }\n```\n\nUpuszczenie elementu (trwałe – zapisuje ruch i stan planszy, potem broadcast):\n```json\n{ \"type\": \"drop\", \"pieceIndex\": 0, \"x\": 100, \"y\": 200, \"correct\": false }\n```\n\nOpuszczenie pokoju:\n```json\n{ \"type\": \"leave\" }\n```\n\n---\n\n### Wiadomości SERWER → KLIENT (JSON)\n\n- `welcome` – `{ type, user_uuid }` – zaraz po handshake.\n- `error` – `{ type, message }` – błąd walidacji/autoryzacji/JSON.\n- `board_state` – `{ type, session_uuid, pieces }` – po `join`, aktualny stan planszy.\n- `presence` – `{ type, event: \"joined\"|\"left\", user_uuid, count, users }` – zmiana obecności; `users` to pełny roster pokoju `[{ user_uuid, username }]` (bez duplikatów), wysyłany też do samego dołączającego.\n- `peer_drag` – `{ type, user_uuid, username, piece_index, x, y }` – przeciąganie innego gracza.\n- `peer_drop` – `{ type, user_uuid, username, piece_index, x, y, correct, seq, moved_at }` – upuszczenie innego gracza; samowystarczalne do podglądu na żywo (nazwa gracza, kolejność `seq`, znacznik czasu `moved_at` ISO-8601).\n- `drop_ack` – potwierdzenie własnego `drop` do nadawcy (te same pola co `peer_drop`).",
+      "item": [
+        {
+          "name": "Connect – Puzzle Board WS",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Połącz się z serwerem. Token do handshake przekazywany jest w query `?token={{jwt_token}}`. Po połączeniu wyślij wiadomości JSON w kompozytorze (przykłady poniżej i w opisie folderu):\n\n1. `{ \"type\": \"join\", \"sessionUuid\": \"{{session_uuid}}\" }`\n2. `{ \"type\": \"drag\", \"pieceIndex\": 0, \"x\": 100, \"y\": 200 }`\n3. `{ \"type\": \"drop\", \"pieceIndex\": 0, \"x\": 100, \"y\": 200, \"correct\": true }`\n4. `{ \"type\": \"leave\" }`\n\nAlternatywnie zamiast query możesz dodać nagłówek `Authorization: Bearer {{jwt_token}}`.",
+            "url": {
+              "raw": "{{ws_url}}?token={{jwt_token}}",
+              "protocol": "ws",
+              "host": ["{{ws_url}}"],
+              "query": [
+                { "key": "token", "value": "{{jwt_token}}" }
+              ]
             }
           }
         }

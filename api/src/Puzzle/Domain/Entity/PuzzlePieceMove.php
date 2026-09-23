@@ -7,7 +7,7 @@ namespace App\Puzzle\Domain\Entity;
 use App\Puzzle\Domain\ValueObject\PieceMoveId;
 use App\Puzzle\Domain\ValueObject\PuzzleId;
 use App\Puzzle\Domain\ValueObject\PuzzleSessionId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 
 /**
  * Append-only log entry: one row per piece drop.

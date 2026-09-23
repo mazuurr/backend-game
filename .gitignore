@@ -51,32 +51,23 @@ Thumbs.db
 # Also ignore any vendor directories in subfolders (api/vendor, crud/vendor, etc.)
 **/vendor/
 
-# Local environment files with secrets (keep .env.example committed)
-.env
-.env.local
-!.env.example
-
 # Ignore log directories (root and in subfolders)
 log/
 logs/
 **/log/
 **/logs/
 
-# Ignore var directories (root and in subfolders, e.g. api/var)
-var/
+# Symfony / CakePHP runtime dirs (cache, sessions, compiled container)
 **/var/
-
-# Ignore tmp directories (root and in subfolders)
-tmp/
 **/tmp/
 
-# Ignore keys and certificates (incl. JWT keys)
-**/config/jwt/*.pem
+# Secrets
+.env
+.env.local
+.env.*.local
 *.pem
-*.key
-*.crt
-*.p12
-*.pfx
-id_rsa
-id_rsa.pub
+config/jwt/
+
+# User uploads
+storage/
 

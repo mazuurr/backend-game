@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Puzzle\Domain\Entity;
 
 use App\Puzzle\Domain\ValueObject\PuzzleId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 
 class PuzzleProgress
 {

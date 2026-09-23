@@ -33,3 +33,10 @@ RUN pecl install xdebug \
     && docker-php-ext-enable xdebug
 
 WORKDIR /var/www/api
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY crontab /etc/cron.d/puzzle-cron
+RUN chmod 0644 /etc/cron.d/puzzle-cron
+
+ENTRYPOINT ["entrypoint.sh"]

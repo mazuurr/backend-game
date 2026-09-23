@@ -1,0 +1,25 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Puzzel API
+            description: |
+                API backendu aplikacji puzzli — rejestracja/logowanie (JWT), profil użytkownika,
+                grupy, kampanie, puzzle, wspólne sesje układania oraz panel administracyjny
+                (nagłówek `X-API-TOKEN`).
+            version: 1.0.0
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+                    description: 'Token JWT z endpointu /api/login, przekazywany jako "Authorization: Bearer <token>".'
+                ApiToken:
+                    type: apiKey
+                    in: header
+                    name: X-API-TOKEN
+                    description: 'Token administracyjny, wymagany dla endpointów /api/admin/*.'
+    areas:
+        default:
+            path_patterns:
+                - ^/api(?!/doc$)

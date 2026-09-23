@@ -12,9 +12,7 @@ final class UserDTO implements \JsonSerializable
         public readonly string $uuid,
         public readonly string $username,
         public readonly string $email,
-        public readonly bool $premium,
         public readonly bool $active,
-        public readonly ?string $groupUuid,
         public readonly string $createdAt,
         public readonly ?string $updatedAt,
     ) {}
@@ -25,9 +23,7 @@ final class UserDTO implements \JsonSerializable
             uuid: $user->getUuid()->value(),
             username: $user->getUsername()->value(),
             email: $user->getEmail()->value(),
-            premium: $user->isPremium(),
             active: $user->isActive(),
-            groupUuid: $user->getGroupId()?->value(),
             createdAt: $user->getCreatedAt()->format(\DateTimeInterface::ATOM),
             updatedAt: $user->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
         );
@@ -39,9 +35,7 @@ final class UserDTO implements \JsonSerializable
             'uuid' => $this->uuid,
             'username' => $this->username,
             'email' => $this->email,
-            'premium' => $this->premium,
             'active' => $this->active,
-            'group_uuid' => $this->groupUuid,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];

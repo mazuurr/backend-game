@@ -11,6 +11,6 @@ final class StartPuzzleSessionCommand
         public readonly string $puzzleUuid,
         public readonly string $createdByUserUuid,
         public readonly string $visibility,
-        public readonly ?string $groupUuid = null,
+        public readonly string $mode = 'individual',
     ) {}
 }

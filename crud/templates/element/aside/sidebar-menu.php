@@ -26,21 +26,21 @@ $action = $this->request->getParam('action');
     </a>
   </li>
 
-  <li class="<?= $controller === 'AdminGroups' ? 'active' : '' ?>">
-    <a href="<?= $this->Url->build(['plugin' => 'AdminConnectAPI', 'controller' => 'AdminGroups', 'action' => 'index']) ?>">
-      <i class="fa fa-object-group"></i> <span>Grupy</span>
-    </a>
-  </li>
-
-  <li class="<?= $controller === 'AdminCampaigns' ? 'active' : '' ?>">
-    <a href="<?= $this->Url->build(['plugin' => 'AdminConnectAPI', 'controller' => 'AdminCampaigns', 'action' => 'index']) ?>">
-      <i class="fa fa-bullhorn"></i> <span>Kampanie</span>
-    </a>
-  </li>
-
   <li class="<?= $controller === 'AdminPuzzles' ? 'active' : '' ?>">
     <a href="<?= $this->Url->build(['plugin' => 'AdminConnectAPI', 'controller' => 'AdminPuzzles', 'action' => 'index']) ?>">
       <i class="fa fa-puzzle-piece"></i> <span>Puzzle</span>
+    </a>
+  </li>
+
+  <li class="<?= $controller === 'AdminSessions' && $action === 'index' ? 'active' : '' ?>">
+    <a href="<?= $this->Url->build(['plugin' => 'AdminConnectAPI', 'controller' => 'AdminSessions', 'action' => 'index']) ?>">
+      <i class="fa fa-clock-o"></i> <span>Sesje</span>
+    </a>
+  </li>
+
+  <li class="<?= $controller === 'AdminSessions' && $action === 'stats' ? 'active' : '' ?>">
+    <a href="<?= $this->Url->build(['plugin' => 'AdminConnectAPI', 'controller' => 'AdminSessions', 'action' => 'stats']) ?>">
+      <i class="fa fa-bar-chart"></i> <span>Statystyki sesji</span>
     </a>
   </li>
 

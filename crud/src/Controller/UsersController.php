@@ -20,7 +20,7 @@ class UsersController extends AppController
             $this->Flash->error('Nieprawidłowa nazwa użytkownika lub hasło.');
         }
 
-        $this->viewBuilder()->setLayout('AdminLTE.login');
+        $this->viewBuilder()->setLayout('login');
         return null;
     }
 

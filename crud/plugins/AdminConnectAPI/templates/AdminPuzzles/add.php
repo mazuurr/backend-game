@@ -48,14 +48,6 @@
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Kampania <small class="text-muted">(opcjonalnie)</small></label>
-            <?php
-              $campaignOptions = ['' => '— brak —'];
-              foreach ($campaigns as $c) { $campaignOptions[$c['uuid']] = $c['name']; }
-            ?>
-            <?= $this->Form->select('campaign_uuid', $campaignOptions, ['class' => 'form-control']) ?>
-          </div>
         </div>
         <div class="box-footer">
           <?= $this->Form->button('<i class="fa fa-upload"></i> Wyślij', ['class' => 'btn btn-primary', 'escapeTitle' => false]) ?>

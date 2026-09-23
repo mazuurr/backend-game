@@ -9,7 +9,7 @@ use App\Puzzle\Domain\Exception\PuzzleNotFoundException;
 use App\Puzzle\Domain\Repository\PuzzleProgressRepositoryInterface;
 use App\Puzzle\Domain\Repository\PuzzleRepositoryInterface;
 use App\Puzzle\Domain\ValueObject\PuzzleId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'command.bus')]

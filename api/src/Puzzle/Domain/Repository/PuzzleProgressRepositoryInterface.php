@@ -6,7 +6,7 @@ namespace App\Puzzle\Domain\Repository;
 
 use App\Puzzle\Domain\Entity\PuzzleProgress;
 use App\Puzzle\Domain\ValueObject\PuzzleId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 
 interface PuzzleProgressRepositoryInterface
 {

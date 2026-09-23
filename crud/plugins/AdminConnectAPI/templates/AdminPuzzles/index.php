@@ -16,18 +16,6 @@
         <div class="box-body">
           <?= $this->Form->create(null, ['type' => 'get', 'url' => ['action' => 'index']]) ?>
           <div class="row">
-            <div class="col-sm-5">
-              <div class="form-group">
-                <label>Kampania</label>
-                <?php
-                  $campaignOptions = ['' => 'Wszystkie'];
-                  foreach ($campaigns as $c) { $campaignOptions[$c['uuid']] = $c['name']; }
-                ?>
-                <?= $this->Form->select('campaign_uuid', $campaignOptions, [
-                  'class' => 'form-control', 'value' => $filters['campaign_uuid'] ?? '',
-                ]) ?>
-              </div>
-            </div>
             <div class="col-sm-2">
               <div class="form-group">
                 <label>Na stronie</label>
@@ -67,17 +55,12 @@
                 <th>Elementów</th>
                 <th>Na fragment</th>
                 <th>Siatka (X×Y)</th>
-                <th>Kampania</th>
                 <th>Utworzone</th>
                 <th class="text-right">Akcje</th>
               </tr>
             </thead>
             <tbody>
               <?php foreach ($puzzles as $puzzle): ?>
-              <?php
-                $campaignUuid = $puzzle['campaign_uuid'] ?? null;
-                $campaignName = $campaignUuid ? ($campaignMap[$campaignUuid] ?? $campaignUuid) : null;
-              ?>
               <tr>
                 <td>
                   <a href="<?= $this->Url->build(['action' => 'view', $puzzle['uuid']]) ?>">
@@ -103,13 +86,6 @@
                 <td>
                   <?php $px = $puzzle['pieces_x'] ?? null; $py = $puzzle['pieces_y'] ?? null; ?>
                   <?= ($px !== null && $py !== null) ? h($px) . '×' . h($py) : '<span class="text-muted">—</span>' ?>
-                </td>
-                <td>
-                  <?php if ($campaignName): ?>
-                    <span class="label label-info"><?= h($campaignName) ?></span>
-                  <?php else: ?>
-                    <span class="text-muted">—</span>
-                  <?php endif; ?>
                 </td>
                 <td><?= $this->Date->format($puzzle['created_at'] ?? null) ?></td>
                 <td class="text-right">

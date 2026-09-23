@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Puzzle\Domain\Entity;
 
-use App\Campaign\Domain\ValueObject\CampaignId;
 use App\Puzzle\Domain\ValueObject\PuzzleId;
 
 class Puzzle
@@ -15,7 +14,6 @@ class Puzzle
     private string $storedFilename;
     private string $mimeType;
     private int $size;
-    private ?CampaignId $campaignUuid;
     private ?int $difficulty;
     private ?int $totalPieces;
     private ?int $piecesPerFragment;
@@ -40,7 +38,6 @@ class Puzzle
         $this->storedFilename = $storedFilename;
         $this->mimeType = $mimeType;
         $this->size = $size;
-        $this->campaignUuid = null;
         $this->difficulty = $difficulty;
         $this->totalPieces = $totalPieces;
         $this->piecesPerFragment = $piecesPerFragment;
@@ -89,27 +86,25 @@ class Puzzle
         $this->piecesY = $piecesY;
     }
 
-    public function assignToCampaign(CampaignId $campaignId): void
-    {
-        $this->campaignUuid = $campaignId;
-    }
-
-    public function removeCampaign(): void
-    {
-        $this->campaignUuid = null;
-    }
-
     public function getId(): int { return $this->id; }
     public function getUuid(): PuzzleId { return $this->uuid; }
     public function getOriginalName(): string { return $this->originalName; }
     public function getStoredFilename(): string { return $this->storedFilename; }
     public function getMimeType(): string { return $this->mimeType; }
     public function getSize(): int { return $this->size; }
-    public function getCampaignUuid(): ?CampaignId { return $this->campaignUuid; }
     public function getDifficulty(): ?int { return $this->difficulty; }
     public function getTotalPieces(): ?int { return $this->totalPieces; }
     public function getPiecesPerFragment(): ?int { return $this->piecesPerFragment; }
     public function getPiecesX(): ?int { return $this->piecesX; }
     public function getPiecesY(): ?int { return $this->piecesY; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+
+    public function getEffectivePieceCount(): int
+    {
+        if ($this->piecesX !== null && $this->piecesY !== null) {
+            return $this->piecesX * $this->piecesY;
+        }
+
+        return $this->totalPieces ?? 0;
+    }
 }

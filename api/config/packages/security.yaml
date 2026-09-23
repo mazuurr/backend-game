@@ -34,7 +34,5 @@ security:
         - { path: ^/api/(register|activate|login|password-reset), roles: PUBLIC_ACCESS }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api/me, roles: ROLE_USER }
-        - { path: ^/api/groups, roles: ROLE_USER }
         - { path: ^/api/puzzles, roles: ROLE_USER }
-        - { path: ^/api/campaigns, roles: ROLE_USER }
         - { path: ^/api/sessions, roles: ROLE_USER }

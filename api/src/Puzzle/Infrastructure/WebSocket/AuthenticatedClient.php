@@ -9,6 +9,6 @@ final class AuthenticatedClient
     public function __construct(
         public readonly string $userUuid,
         public readonly string $email,
-        public readonly ?string $groupUuid,
+        public readonly string $username,
     ) {}
 }

@@ -7,14 +7,9 @@ doctrine:
             username: App\User\Infrastructure\Persistence\Doctrine\Type\UsernameType
             hashed_password: App\User\Infrastructure\Persistence\Doctrine\Type\HashedPasswordType
             activation_token: App\User\Infrastructure\Persistence\Doctrine\Type\ActivationTokenType
-            group_id: App\Group\Infrastructure\Persistence\Doctrine\Type\GroupIdType
-            group_invitation_id: App\Group\Infrastructure\Persistence\Doctrine\Type\GroupInvitationIdType
-            group_name: App\Group\Infrastructure\Persistence\Doctrine\Type\GroupNameType
             puzzle_id: App\Puzzle\Infrastructure\Persistence\Doctrine\Type\PuzzleIdType
             puzzle_session_id: App\Puzzle\Infrastructure\Persistence\Doctrine\Type\PuzzleSessionIdType
             piece_move_id: App\Puzzle\Infrastructure\Persistence\Doctrine\Type\PieceMoveIdType
-            campaign_id: App\Campaign\Infrastructure\Persistence\Doctrine\Type\CampaignIdType
-            campaign_name: App\Campaign\Infrastructure\Persistence\Doctrine\Type\CampaignNameType
 
     orm:
         auto_generate_proxy_classes: true
@@ -27,24 +22,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/User/Infrastructure/Persistence/Doctrine/Mapping'
                 prefix: App\User\Domain\Entity
                 alias: User
-            Group:
-                is_bundle: false
-                type: xml
-                dir: '%kernel.project_dir%/src/Group/Infrastructure/Persistence/Doctrine/Mapping'
-                prefix: App\Group\Domain\Entity
-                alias: Group
             Puzzle:
                 is_bundle: false
                 type: xml
                 dir: '%kernel.project_dir%/src/Puzzle/Infrastructure/Persistence/Doctrine/Mapping'
                 prefix: App\Puzzle\Domain\Entity
                 alias: Puzzle
-            Campaign:
-                is_bundle: false
-                type: xml
-                dir: '%kernel.project_dir%/src/Campaign/Infrastructure/Persistence/Doctrine/Mapping'
-                prefix: App\Campaign\Domain\Entity
-                alias: Campaign
 
 when@prod:
     doctrine:

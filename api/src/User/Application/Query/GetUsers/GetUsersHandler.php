@@ -24,13 +24,11 @@ final class GetUsersHandler
             $offset,
             $query->perPage,
             $query->active,
-            $query->premium,
             $query->search,
         );
 
         $total = $this->userRepository->countFiltered(
             $query->active,
-            $query->premium,
             $query->search,
         );
 

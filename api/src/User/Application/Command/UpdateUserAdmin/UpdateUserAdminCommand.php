@@ -11,7 +11,6 @@ final class UpdateUserAdminCommand
         public readonly ?string $username = null,
         public readonly ?string $email = null,
         public readonly ?string $password = null,
-        public readonly ?bool $premium = null,
         public readonly ?bool $active = null,
     ) {}
 }

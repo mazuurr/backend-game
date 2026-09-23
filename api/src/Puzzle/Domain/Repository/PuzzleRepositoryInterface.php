@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Puzzle\Domain\Repository;
 
-use App\Campaign\Domain\ValueObject\CampaignId;
 use App\Puzzle\Domain\Entity\Puzzle;
 use App\Puzzle\Domain\ValueObject\PuzzleId;
 
@@ -20,10 +19,7 @@ interface PuzzleRepositoryInterface
     public function findAll(): array;
 
     /** @return Puzzle[] */
-    public function findPaginated(int $offset, int $limit, ?string $campaignUuid): array;
+    public function findPaginated(int $offset, int $limit): array;
 
-    public function countFiltered(?string $campaignUuid): int;
-
-    /** @return Puzzle[] */
-    public function findByCampaignId(CampaignId $campaignId): array;
+    public function countFiltered(): int;
 }

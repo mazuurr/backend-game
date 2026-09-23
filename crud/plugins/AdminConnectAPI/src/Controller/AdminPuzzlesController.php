@@ -10,7 +10,6 @@ class AdminPuzzlesController extends AppController
     public function index(): void
     {
         $filters = [
-            'campaign_uuid' => $this->request->getQuery('campaign_uuid', ''),
             'page'          => (int) $this->request->getQuery('page', 1),
             'per_page'      => (int) $this->request->getQuery('per_page', 20),
         ];
@@ -20,11 +19,7 @@ class AdminPuzzlesController extends AppController
         $puzzles = $response['data'] ?? [];
         $meta    = $response['meta'] ?? ['page' => 1, 'pages' => 1, 'total' => count($puzzles), 'per_page' => 20];
 
-        $campaignsResponse = $this->api->get('/admin/campaigns', ['per_page' => 100]);
-        $campaigns = $campaignsResponse['data'] ?? [];
-        $campaignMap = array_column($campaigns, 'name', 'uuid');
-
-        $this->set(compact('puzzles', 'meta', 'filters', 'campaignMap', 'campaigns'));
+        $this->set(compact('puzzles', 'meta', 'filters'));
     }
 
     public function view(string $uuid): void
@@ -32,47 +27,15 @@ class AdminPuzzlesController extends AppController
         $response = $this->api->get("/admin/puzzles/{$uuid}");
         $puzzle = $response['data'] ?? [];
 
-        $campaignsResponse = $this->api->get('/admin/campaigns');
-        $campaigns = $campaignsResponse['data'] ?? [];
-
-        $this->set(compact('puzzle', 'campaigns'));
-    }
-
-    public function assignCampaign(string $uuid): Response
-    {
-        $this->request->allowMethod(['post']);
-        $campaignUuid = $this->request->getData('campaign_uuid');
-        $response = $this->api->post("/admin/campaigns/{$campaignUuid}/puzzles/{$uuid}");
-        if ($this->api->isSuccess($response)) {
-            $this->Flash->success('Puzzle zostało przypisane do kampanii.');
-        } else {
-            $this->Flash->error($response['message'] ?? 'Błąd podczas przypisywania do kampanii.');
-        }
-        return $this->redirect(['action' => 'view', $uuid]);
-    }
-
-    public function removeCampaign(string $uuid, string $campaignUuid): Response
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $response = $this->api->delete("/admin/campaigns/{$campaignUuid}/puzzles/{$uuid}");
-        if ($this->api->isSuccess($response)) {
-            $this->Flash->success('Puzzle zostało odpięte od kampanii.');
-        } else {
-            $this->Flash->error($response['message'] ?? 'Błąd podczas odpinania kampanii.');
-        }
-        return $this->redirect(['action' => 'view', $uuid]);
+        $this->set(compact('puzzle'));
     }
 
     public function add(): ?Response
     {
-        $campaignsResponse = $this->api->get('/admin/campaigns', ['per_page' => 100]);
-        $campaigns = $campaignsResponse['data'] ?? [];
-
         if ($this->request->is('post')) {
             $file = $this->request->getUploadedFile('image');
             if (!$file || $file->getError() !== UPLOAD_ERR_OK) {
                 $this->Flash->error('Wybierz plik grafiki.');
-                $this->set(compact('campaigns'));
                 return null;
             }
             $payload = ['image' => $file];
@@ -85,17 +48,12 @@ class AdminPuzzlesController extends AppController
             $response = $this->api->postMultipart('/admin/puzzles', $payload);
             if ($this->api->isSuccess($response)) {
                 $puzzleUuid = $response['uuid'] ?? null;
-                $campaignUuid = $this->request->getData('campaign_uuid');
-                if ($puzzleUuid && $campaignUuid) {
-                    $this->api->post("/admin/campaigns/{$campaignUuid}/puzzles/{$puzzleUuid}");
-                }
                 $this->Flash->success('Puzzle zostało dodane.');
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error($response['message'] ?? 'Błąd podczas dodawania puzzla.');
         }
 
-        $this->set(compact('campaigns'));
         return null;
     }
 

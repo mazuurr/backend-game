@@ -8,7 +8,7 @@ use App\User\Domain\Exception\UserNotFoundException;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\Email;
 use App\User\Domain\ValueObject\HashedPassword;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use App\User\Domain\ValueObject\Username;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 

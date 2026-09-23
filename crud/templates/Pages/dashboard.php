@@ -20,19 +20,6 @@
     </div>
 
     <div class="col-lg-3 col-xs-6">
-      <div class="small-box bg-green">
-        <div class="inner">
-          <h3>&nbsp;</h3>
-          <p>Kampanie</p>
-        </div>
-        <div class="icon"><i class="fa fa-bullhorn"></i></div>
-        <a href="<?= $this->Url->build(['plugin' => 'AdminConnectAPI', 'controller' => 'AdminCampaigns', 'action' => 'index']) ?>" class="small-box-footer">
-          Przejdź <i class="fa fa-arrow-circle-right"></i>
-        </a>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-xs-6">
       <div class="small-box bg-yellow">
         <div class="inner">
           <h3>&nbsp;</h3>
@@ -45,17 +32,5 @@
       </div>
     </div>
 
-    <div class="col-lg-3 col-xs-6">
-      <div class="small-box bg-red">
-        <div class="inner">
-          <h3>&nbsp;</h3>
-          <p>Grupy</p>
-        </div>
-        <div class="icon"><i class="fa fa-object-group"></i></div>
-        <a href="<?= $this->Url->build(['plugin' => 'AdminConnectAPI', 'controller' => 'AdminGroups', 'action' => 'index']) ?>" class="small-box-footer">
-          Przejdź <i class="fa fa-arrow-circle-right"></i>
-        </a>
-      </div>
-    </div>
   </div>
 </section>

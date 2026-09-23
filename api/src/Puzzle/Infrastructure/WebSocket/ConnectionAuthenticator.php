@@ -48,7 +48,7 @@ final class ConnectionAuthenticator
         return new AuthenticatedClient(
             userUuid: $user->getUuid()->value(),
             email: $email,
-            groupUuid: $user->getGroupId()?->value(),
+            username: $user->getUsername()->value(),
         );
     }
 }

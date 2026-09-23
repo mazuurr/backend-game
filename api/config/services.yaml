@@ -3,18 +3,6 @@ services:
         autowire: true
         autoconfigure: true
 
-    # === Bounded Context: Campaign ===
-
-    App\Campaign\:
-        resource: '../src/Campaign/'
-        exclude:
-            - '../src/Campaign/Domain/Entity/'
-            - '../src/Campaign/Domain/ValueObject/'
-            - '../src/Campaign/Domain/Exception/'
-
-    App\Campaign\Domain\Repository\CampaignRepositoryInterface:
-        alias: App\Campaign\Infrastructure\Persistence\Doctrine\Repository\DoctrineCampaignRepository
-
     # === Bounded Context: Puzzle ===
 
     App\Puzzle\:
@@ -39,6 +27,9 @@ services:
     App\Puzzle\Domain\Repository\PuzzleBoardPieceRepositoryInterface:
         alias: App\Puzzle\Infrastructure\Persistence\Doctrine\Repository\DoctrinePuzzleBoardPieceRepository
 
+    App\Puzzle\Domain\Repository\PuzzleSessionStatRepositoryInterface:
+        alias: App\Puzzle\Infrastructure\Persistence\Doctrine\Repository\DoctrinePuzzleSessionStatRepository
+
     App\Puzzle\Application\Storage\PuzzleStorageInterface:
         alias: App\Puzzle\Infrastructure\Storage\LocalPuzzleStorage
 
@@ -50,18 +41,6 @@ services:
         arguments:
             $defaultHost: '%env(WS_HOST)%'
             $defaultPort: '%env(int:WS_PORT)%'
-
-    # === Bounded Context: Group ===
-
-    App\Group\:
-        resource: '../src/Group/'
-        exclude:
-            - '../src/Group/Domain/Entity/'
-            - '../src/Group/Domain/ValueObject/'
-            - '../src/Group/Domain/Exception/'
-
-    App\Group\Domain\Repository\GroupRepositoryInterface:
-        alias: App\Group\Infrastructure\Persistence\Doctrine\Repository\DoctrineGroupRepository
 
     # === Bounded Context: User ===
 
@@ -75,6 +54,9 @@ services:
 
     App\Shared\:
         resource: '../src/Shared/'
+        exclude:
+            - '../src/Shared/Domain/ValueObject/'
+            - '../src/Shared/Domain/Exception/'
 
     # --- Repository ---
     App\User\Domain\Repository\UserRepositoryInterface:
@@ -94,6 +76,11 @@ services:
     App\Shared\Infrastructure\Bus\Query\SymfonyQueryBus:
         arguments:
             $queryBus: '@query.bus'
+
+    # --- Event Listener ---
+    App\Shared\Infrastructure\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
 
     # --- Security ---
     App\User\Infrastructure\Security\ApiTokenAuthenticator:
@@ -118,8 +105,3 @@ services:
         arguments:
             $passwordResetBaseUrl: '%env(PASSWORD_RESET_BASE_URL)%'
             $fromEmail: '%env(MAILER_FROM)%'
-
-    # --- Event Listener ---
-    App\User\Infrastructure\EventListener\ExceptionListener:
-        tags:
-            - { name: kernel.event_listener, event: kernel.exception }

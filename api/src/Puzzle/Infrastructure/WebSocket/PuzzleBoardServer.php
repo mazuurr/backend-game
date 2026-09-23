@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Puzzle\Infrastructure\WebSocket;
 
 use App\Puzzle\Application\Command\RecordPieceMove\RecordPieceMoveCommand;
+use App\Puzzle\Application\Command\RecordPieceMove\RecordPieceMoveResult;
 use App\Puzzle\Application\DTO\SessionDTO;
 use App\Puzzle\Application\Query\GetBoardState\GetBoardStateQuery;
 use App\Puzzle\Application\Query\GetSession\GetSessionQuery;
@@ -47,7 +48,6 @@ final class PuzzleBoardServer
     public function bindTo(Worker $worker): void
     {
         $worker->onConnect = function (TcpConnection $connection): void {
-            // The handshake carries the JWT (query ?token= or Authorization header).
             $connection->onWebSocketConnect = function (TcpConnection $conn, string $header): void {
                 $this->onHandshake($conn, $header);
             };
@@ -109,7 +109,6 @@ final class PuzzleBoardServer
             $this->logger->error('WebSocket message handling failed', ['exception' => $e]);
             $this->send($from, ['type' => 'error', 'message' => 'Internal server error.']);
         } finally {
-            // Keep the long-running EM clean between messages.
             $this->em->clear();
         }
     }
@@ -139,15 +138,6 @@ final class PuzzleBoardServer
             return;
         }
 
-        if ($session->visibility === PuzzleSession::VISIBILITY_GROUP
-            && $session->groupUuid !== $context->client->groupUuid
-        ) {
-            $this->send($conn, ['type' => 'error', 'message' => 'You are not a member of this group session.']);
-
-            return;
-        }
-
-        // One room per connection: leave a previous one first.
         if ($context->sessionUuid !== null && $context->sessionUuid !== $sessionUuid) {
             $this->leaveRoom($conn, $context);
         }
@@ -169,7 +159,8 @@ final class PuzzleBoardServer
             'event' => 'joined',
             'user_uuid' => $context->client->userUuid,
             'count' => $this->rooms[$sessionUuid]->count(),
-        ], exclude: $conn);
+            'users' => $this->roster($sessionUuid),
+        ]);
     }
 
     /**
@@ -182,6 +173,7 @@ final class PuzzleBoardServer
         $this->broadcast($sessionUuid, [
             'type' => 'peer_drag',
             'user_uuid' => $context->client->userUuid,
+            'username' => $context->client->username,
             'piece_index' => $this->requireInt($data, 'pieceIndex'),
             'x' => $this->requireInt($data, 'x'),
             'y' => $this->requireInt($data, 'y'),
@@ -198,27 +190,30 @@ final class PuzzleBoardServer
         $pieceIndex = $this->requireInt($data, 'pieceIndex');
         $x = $this->requireInt($data, 'x');
         $y = $this->requireInt($data, 'y');
-        $correct = (bool) ($data['correct'] ?? false);
 
-        $this->commandBus->dispatch(new RecordPieceMoveCommand(
+        /** @var RecordPieceMoveResult $result */
+        $result = $this->commandBus->dispatchWithResult(new RecordPieceMoveCommand(
             sessionUuid: $sessionUuid,
             userUuid: $context->client->userUuid,
             pieceIndex: $pieceIndex,
             toX: $x,
             toY: $y,
-            correct: $correct,
+            correct: (bool) ($data['correct'] ?? false),
         ));
 
         $payload = [
             'type' => 'peer_drop',
             'user_uuid' => $context->client->userUuid,
+            'username' => $context->client->username,
             'piece_index' => $pieceIndex,
             'x' => $x,
             'y' => $y,
-            'correct' => $correct,
+            'correct' => $result->correct,
+            'seq' => $result->seq,
+            'moved_at' => $result->movedAt->format(\DateTimeInterface::ATOM),
+            'session_completed' => $result->sessionCompleted,
         ];
 
-        // Confirm to the sender, broadcast to everyone else in the room.
         $this->send($conn, ['type' => 'drop_ack'] + $payload);
         $this->broadcast($sessionUuid, $payload, exclude: $conn);
     }
@@ -250,7 +245,32 @@ final class PuzzleBoardServer
             'event' => 'left',
             'user_uuid' => $context->client->userUuid,
             'count' => $this->rooms[$sessionUuid]->count(),
+            'users' => $this->roster($sessionUuid),
         ]);
+    }
+
+    /**
+     * Unique participants currently connected to a room, with display names.
+     * De-duplicated by user so a player on two devices counts once.
+     *
+     * @return list<array{user_uuid: string, username: string}>
+     */
+    private function roster(string $sessionUuid): array
+    {
+        if (!isset($this->rooms[$sessionUuid])) {
+            return [];
+        }
+
+        $byUuid = [];
+        foreach ($this->rooms[$sessionUuid] as $conn) {
+            $client = $this->rooms[$sessionUuid][$conn]->client;
+            $byUuid[$client->userUuid] = [
+                'user_uuid' => $client->userUuid,
+                'username' => $client->username,
+            ];
+        }
+
+        return array_values($byUuid);
     }
 
     /**

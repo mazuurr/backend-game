@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Puzzle\Application\Command\RecordPieceMove;
 
+use App\Puzzle\Application\Service\SessionStatRecorder;
+use App\Puzzle\Domain\Entity\Puzzle;
 use App\Puzzle\Domain\Entity\PuzzleBoardPiece;
 use App\Puzzle\Domain\Entity\PuzzlePieceMove;
+use App\Puzzle\Domain\Entity\PuzzleSession;
 use App\Puzzle\Domain\Exception\InvalidPieceMoveException;
 use App\Puzzle\Domain\Exception\PuzzleNotFoundException;
 use App\Puzzle\Domain\Exception\PuzzleSessionClosedException;
@@ -17,12 +20,22 @@ use App\Puzzle\Domain\Repository\PuzzleSessionRepositoryInterface;
 use App\Puzzle\Domain\ValueObject\PieceMoveId;
 use App\Puzzle\Domain\ValueObject\PiecePosition;
 use App\Puzzle\Domain\ValueObject\PuzzleSessionId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * Persists a piece drop in one transaction (doctrine_transaction middleware):
- * append to the move log AND upsert the materialized board state.
+ * append to the move log AND upsert the materialized board state. When that
+ * drop completes the puzzle (every piece now correctly placed), the session is
+ * closed immediately — same as a manual close — and its stats snapshot is
+ * recorded right away rather than waiting for the purge cron.
+ *
+ * "Correct" is never taken on the client's word: a piece belongs at the cell
+ * whose index equals its own pieceIndex (row-major, same convention the app
+ * uses — see puzzle-tel's board_cubit `_cellAt`/`correct: pieceA == cellB`),
+ * so whenever the grid size is known the server re-derives it from
+ * toX/toY/pieceIndex itself. The client's claim is only trusted as a fallback
+ * for puzzles without grid metadata, where there is nothing to check it against.
  */
 #[AsMessageHandler(bus: 'command.bus')]
 final class RecordPieceMoveHandler
@@ -32,9 +45,10 @@ final class RecordPieceMoveHandler
         private readonly PuzzleRepositoryInterface $puzzleRepository,
         private readonly PuzzlePieceMoveRepositoryInterface $moveRepository,
         private readonly PuzzleBoardPieceRepositoryInterface $boardRepository,
+        private readonly SessionStatRecorder $statRecorder,
     ) {}
 
-    public function __invoke(RecordPieceMoveCommand $command): void
+    public function __invoke(RecordPieceMoveCommand $command): RecordPieceMoveResult
     {
         $sessionId = new PuzzleSessionId($command->sessionUuid);
         $session = $this->sessionRepository->findByUuid($sessionId);
@@ -58,6 +72,8 @@ final class RecordPieceMoveHandler
 
         $this->assertWithinPuzzle($puzzle->getTotalPieces(), $puzzle->getPiecesX(), $puzzle->getPiecesY(), $command->pieceIndex, $position);
 
+        $correct = $this->resolveCorrectness($puzzle, $command->pieceIndex, $position, $command->correct);
+
         $moveUuid = PieceMoveId::generate();
         $seq = $this->moveRepository->nextSeq($sessionId);
 
@@ -69,7 +85,7 @@ final class RecordPieceMoveHandler
             pieceIndex: $command->pieceIndex,
             toX: $position->x,
             toY: $position->y,
-            correct: $command->correct,
+            correct: $correct,
             seq: $seq,
         );
         $this->moveRepository->save($move);
@@ -82,14 +98,64 @@ final class RecordPieceMoveHandler
                 pieceIndex: $command->pieceIndex,
                 toX: $position->x,
                 toY: $position->y,
-                correct: $command->correct,
+                correct: $correct,
                 lastMoveUuid: $moveUuid,
             );
         } else {
-            $piece->moveTo($position->x, $position->y, $command->correct, $moveUuid);
+            $piece->moveTo($position->x, $position->y, $correct, $moveUuid);
         }
 
         $this->boardRepository->save($piece);
+
+        $completed = $this->closeSessionIfCompleted($session, $puzzle, $sessionId);
+
+        return new RecordPieceMoveResult($seq, $move->getMovedAt(), $correct, $completed);
+    }
+
+    /**
+     * A piece belongs at the cell sharing its own index (row-major: cell =
+     * y * columns + x). Falls back to the client's claim only when the grid
+     * size isn't known, since there is then nothing to check it against.
+     */
+    private function resolveCorrectness(Puzzle $puzzle, int $pieceIndex, PiecePosition $position, bool $clientClaim): bool
+    {
+        $columns = $puzzle->getPiecesX();
+        $rows = $puzzle->getPiecesY();
+
+        if ($columns === null || $rows === null) {
+            return $clientClaim;
+        }
+
+        return $pieceIndex === ($position->y * $columns + $position->x);
+    }
+
+    private function closeSessionIfCompleted(PuzzleSession $session, Puzzle $puzzle, PuzzleSessionId $sessionId): bool
+    {
+        $total = $puzzle->getEffectivePieceCount();
+
+        if ($total <= 0) {
+            return false;
+        }
+
+        $correct = 0;
+        foreach ($this->boardRepository->findBySession($sessionId) as $boardPiece) {
+            if ($boardPiece->isCorrect()) {
+                ++$correct;
+            }
+        }
+
+        if ($correct < $total) {
+            return false;
+        }
+
+        $session->close();
+        $this->sessionRepository->save($session);
+        // $correct === $total here by construction, so the just-computed tally
+        // can be handed straight to the recorder instead of re-deriving it from
+        // a full move-log rescan (SessionContributionsCalculator::forSession).
+        $this->statRecorder->recordCompletionIfMissing($session, $total, $correct);
+
+        return true;
     }
 
     private function assertWithinPuzzle(

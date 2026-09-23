@@ -9,7 +9,7 @@ use App\User\Domain\Exception\EmailAlreadyExistsException;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\Email;
 use App\User\Domain\ValueObject\HashedPassword;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use App\User\Infrastructure\Mailer\ActivationMailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 

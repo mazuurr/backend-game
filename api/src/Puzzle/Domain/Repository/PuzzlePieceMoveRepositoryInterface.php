@@ -15,4 +15,6 @@ interface PuzzlePieceMoveRepositoryInterface
 
     /** @return PuzzlePieceMove[] */
     public function findBySession(PuzzleSessionId $sessionUuid): array;
+
+    public function deleteBySession(PuzzleSessionId $sessionUuid): void;
 }

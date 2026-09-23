@@ -15,7 +15,6 @@
         <field name="storedFilename" type="string" column="stored_filename" length="255"/>
         <field name="mimeType" type="string" column="mime_type" length="100"/>
         <field name="size" type="integer" column="size"/>
-        <field name="campaignUuid" type="campaign_id" column="campaign_uuid" nullable="true" length="36"/>
         <field name="difficulty" type="integer" column="difficulty" nullable="true"/>
         <field name="totalPieces" type="integer" column="total_pieces" nullable="true"/>
         <field name="piecesPerFragment" type="integer" column="pieces_per_fragment" nullable="true"/>

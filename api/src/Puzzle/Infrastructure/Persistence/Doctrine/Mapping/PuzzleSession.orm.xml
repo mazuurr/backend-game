@@ -13,7 +13,7 @@
         <field name="uuid" type="puzzle_session_id" column="uuid" length="36" unique="true"/>
         <field name="puzzleUuid" type="puzzle_id" column="puzzle_uuid" length="36"/>
         <field name="visibility" type="string" column="visibility" length="16"/>
-        <field name="groupUuid" type="group_id" column="group_uuid" length="36" nullable="true"/>
+        <field name="mode" type="string" column="mode" length="16"/>
         <field name="createdByUserUuid" type="user_id" column="created_by_user_uuid" length="36"/>
         <field name="status" type="string" column="status" length="16"/>
         <field name="createdAt" type="datetime_immutable" column="created_at"/>

@@ -10,7 +10,6 @@ final class GetUsersQuery
         public readonly int $page = 1,
         public readonly int $perPage = 20,
         public readonly ?bool $active = null,
-        public readonly ?bool $premium = null,
         public readonly ?string $search = null,
     ) {}
 }

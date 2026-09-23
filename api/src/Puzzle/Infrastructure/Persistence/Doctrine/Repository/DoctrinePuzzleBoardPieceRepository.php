@@ -46,4 +46,14 @@ final class DoctrinePuzzleBoardPieceRepository implements PuzzleBoardPieceReposi
             ->getQuery()
             ->getResult();
     }
+
+    public function deleteBySession(PuzzleSessionId $sessionUuid): void
+    {
+        $this->em->createQueryBuilder()
+            ->delete(PuzzleBoardPiece::class, 'b')
+            ->where('b.sessionUuid = :sessionUuid')
+            ->setParameter('sessionUuid', $sessionUuid->value())
+            ->getQuery()
+            ->execute();
+    }
 }

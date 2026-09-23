@@ -4,26 +4,27 @@ declare(strict_types=1);
 
 namespace App\Puzzle\Domain\Entity;
 
-use App\Group\Domain\ValueObject\GroupId;
 use App\Puzzle\Domain\ValueObject\PuzzleId;
 use App\Puzzle\Domain\ValueObject\PuzzleSessionId;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 
 class PuzzleSession
 {
     public const VISIBILITY_PUBLIC = 'public';
-    public const VISIBILITY_GROUP = 'group';
+
+    public const MODE_INDIVIDUAL = 'individual';
+    public const MODE_SHARED = 'shared';
 
     public const STATUS_OPEN = 'open';
     public const STATUS_CLOSED = 'closed';
 
-    public const LIFETIME_HOURS = 24;
+    public const LIFETIME_MODIFIER_REGULAR = '+1 month';
 
     private int $id;
     private PuzzleSessionId $uuid;
     private PuzzleId $puzzleUuid;
     private string $visibility;
-    private ?GroupId $groupUuid;
+    private string $mode;
     private UserId $createdByUserUuid;
     private string $status;
     private \DateTimeImmutable $createdAt;
@@ -34,25 +35,25 @@ class PuzzleSession
         PuzzleSessionId $uuid,
         PuzzleId $puzzleUuid,
         string $visibility,
-        ?GroupId $groupUuid,
+        string $mode,
         UserId $createdByUserUuid,
     ) {
-        if (!in_array($visibility, [self::VISIBILITY_PUBLIC, self::VISIBILITY_GROUP], true)) {
+        if ($visibility !== self::VISIBILITY_PUBLIC) {
             throw new \InvalidArgumentException(sprintf('Invalid visibility: %s', $visibility));
         }
 
-        if ($visibility === self::VISIBILITY_GROUP && $groupUuid === null) {
-            throw new \InvalidArgumentException('A group session requires a group.');
+        if (!in_array($mode, [self::MODE_INDIVIDUAL, self::MODE_SHARED], true)) {
+            throw new \InvalidArgumentException(sprintf('Invalid mode: %s', $mode));
         }
 
         $this->uuid = $uuid;
         $this->puzzleUuid = $puzzleUuid;
         $this->visibility = $visibility;
-        $this->groupUuid = $visibility === self::VISIBILITY_GROUP ? $groupUuid : null;
+        $this->mode = $mode;
         $this->createdByUserUuid = $createdByUserUuid;
         $this->status = self::STATUS_OPEN;
         $this->createdAt = new \DateTimeImmutable();
-        $this->expiresAt = $this->createdAt->modify(sprintf('+%d hours', self::LIFETIME_HOURS));
+        $this->expiresAt = $this->createdAt->modify(self::LIFETIME_MODIFIER_REGULAR);
         $this->closedAt = null;
     }
 
@@ -60,10 +61,10 @@ class PuzzleSession
         PuzzleSessionId $uuid,
         PuzzleId $puzzleUuid,
         string $visibility,
-        ?GroupId $groupUuid,
         UserId $createdByUserUuid,
+        string $mode = self::MODE_INDIVIDUAL,
     ): self {
-        return new self($uuid, $puzzleUuid, $visibility, $groupUuid, $createdByUserUuid);
+        return new self($uuid, $puzzleUuid, $visibility, $mode, $createdByUserUuid);
     }
 
     public function close(): void
@@ -86,6 +87,16 @@ class PuzzleSession
         return $this->visibility === self::VISIBILITY_PUBLIC;
     }
 
+    public function isIndividual(): bool
+    {
+        return $this->mode === self::MODE_INDIVIDUAL;
+    }
+
+    public function isShared(): bool
+    {
+        return $this->mode === self::MODE_SHARED;
+    }
+
     public function isExpiredAt(\DateTimeImmutable $now): bool
     {
         return $now >= $this->expiresAt;
@@ -95,7 +106,7 @@ class PuzzleSession
     public function getUuid(): PuzzleSessionId { return $this->uuid; }
     public function getPuzzleUuid(): PuzzleId { return $this->puzzleUuid; }
     public function getVisibility(): string { return $this->visibility; }
-    public function getGroupUuid(): ?GroupId { return $this->groupUuid; }
+    public function getMode(): string { return $this->mode; }
     public function getCreatedByUserUuid(): UserId { return $this->createdByUserUuid; }
     public function getStatus(): string { return $this->status; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }

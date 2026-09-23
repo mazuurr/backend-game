@@ -231,3 +231,14 @@ ServerRequest::addDetector('tablet', function ($request) {
 // and https://unicode-org.github.io/icu/userguide/format_parse/datetime/#datetime-format-syntax
 // \Cake\I18n\Date::setToStringFormat('dd.MM.yyyy');
 // \Cake\I18n\Time::setToStringFormat('dd.MM.yyyy HH:mm');
+
+/*
+ * AdminLTE theme branding. Must be set before the AdminLTE plugin's own
+ * bootstrap runs (which only writes defaults when these keys are unset).
+ */
+Configure::write('Theme.title', 'Puzzel Admin');
+Configure::write('Theme.logo.mini', '<b>P</b>A');
+Configure::write('Theme.logo.large', '<b>Puzzel</b> Admin');
+Configure::write('Theme.login.show_social', false);
+Configure::write('Theme.login.show_register', false);
+Configure::write('Theme.login.show_remember', false);

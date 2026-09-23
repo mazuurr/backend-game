@@ -21,5 +21,9 @@ RUN git config --global --add safe.directory /var/www
 
 WORKDIR /var/www/api
 
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+
 # Long-running WebSocket process (Workerman). Apache is intentionally absent.
-CMD ["php", "bin/console", "app:ws:serve"]
+ENTRYPOINT ["entrypoint.sh"]

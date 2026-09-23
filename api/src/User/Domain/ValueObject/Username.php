@@ -35,7 +35,7 @@ final class Username
         // Dodaj losowy suffix żeby uniknąć kolizji
         $suffix = '_' . bin2hex(random_bytes(3));
 
-        return new self(mb_substr($base, 0, 44) . $suffix);
+        return new self(mb_substr($base, 0, 50 - mb_strlen($suffix)) . $suffix);
     }
 
     public function value(): string

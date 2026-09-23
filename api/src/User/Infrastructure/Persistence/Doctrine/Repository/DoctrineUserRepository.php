@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\Group\Domain\ValueObject\GroupId;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\Email;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineUserRepository implements UserRepositoryInterface
@@ -100,33 +99,9 @@ final class DoctrineUserRepository implements UserRepositoryInterface
     }
 
     /** @return User[] */
-    public function findByGroupId(GroupId $groupId): array
+    public function findPaginated(int $offset, int $limit, ?bool $active, ?string $search): array
     {
-        return $this->em->createQueryBuilder()
-            ->select('u')
-            ->from(User::class, 'u')
-            ->where('u.groupId = :groupId')
-            ->setParameter('groupId', $groupId->value())
-            ->orderBy('u.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function countByGroupId(GroupId $groupId): int
-    {
-        return (int) $this->em->createQueryBuilder()
-            ->select('COUNT(u.id)')
-            ->from(User::class, 'u')
-            ->where('u.groupId = :groupId')
-            ->setParameter('groupId', $groupId->value())
-            ->getQuery()
-            ->getSingleScalarResult();
-    }
-
-    /** @return User[] */
-    public function findPaginated(int $offset, int $limit, ?bool $active, ?bool $premium, ?string $search): array
-    {
-        $qb = $this->buildFilterQuery('u', $active, $premium, $search)
+        $qb = $this->buildFilterQuery('u', $active, $search)
             ->orderBy('u.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
@@ -134,15 +109,15 @@ final class DoctrineUserRepository implements UserRepositoryInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function countFiltered(?bool $active, ?bool $premium, ?string $search): int
+    public function countFiltered(?bool $active, ?string $search): int
     {
-        $qb = $this->buildFilterQuery('u', $active, $premium, $search)
+        $qb = $this->buildFilterQuery('u', $active, $search)
             ->select('COUNT(u.id)');
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
-    private function buildFilterQuery(string $alias, ?bool $active, ?bool $premium, ?string $search): \Doctrine\ORM\QueryBuilder
+    private function buildFilterQuery(string $alias, ?bool $active, ?string $search): \Doctrine\ORM\QueryBuilder
     {
         $qb = $this->em->createQueryBuilder()
             ->select($alias)
@@ -150,9 +125,6 @@ final class DoctrineUserRepository implements UserRepositoryInterface
 
         if ($active !== null) {
             $qb->andWhere("$alias.active = :active")->setParameter('active', $active);
-        }
-        if ($premium !== null) {
-            $qb->andWhere("$alias.premium = :premium")->setParameter('premium', $premium);
         }
         if ($search !== null && $search !== '') {
             $qb->andWhere("$alias.username LIKE :search OR $alias.email LIKE :search")

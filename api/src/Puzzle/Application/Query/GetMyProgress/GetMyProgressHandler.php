@@ -7,7 +7,7 @@ namespace App\Puzzle\Application\Query\GetMyProgress;
 use App\Puzzle\Application\DTO\PuzzleProgressDTO;
 use App\Puzzle\Domain\Repository\PuzzleProgressRepositoryInterface;
 use App\Puzzle\Domain\Repository\PuzzleRepositoryInterface;
-use App\User\Domain\ValueObject\UserId;
+use App\Shared\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'query.bus')]
@@ -26,7 +26,7 @@ final class GetMyProgressHandler
         return array_map(function ($progress) {
             $puzzle = $this->puzzleRepository->findByUuid($progress->getPuzzleUuid());
 
-            return PuzzleProgressDTO::fromEntity($progress, $puzzle?->getPiecesCount());
+            return PuzzleProgressDTO::fromEntity($progress, $puzzle?->getPiecesPerFragment());
         }, $progressList);
     }
 }

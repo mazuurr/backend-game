@@ -20,8 +20,8 @@ final class GetPuzzlesHandler
     {
         $offset = ($query->page - 1) * $query->perPage;
 
-        $puzzles = $this->puzzleRepository->findPaginated($offset, $query->perPage, $query->campaignUuid);
-        $total = $this->puzzleRepository->countFiltered($query->campaignUuid);
+        $puzzles = $this->puzzleRepository->findPaginated($offset, $query->perPage);
+        $total = $this->puzzleRepository->countFiltered();
 
         return new PaginatedResult(
             data: array_map(static fn ($puzzle) => PuzzleDTO::fromEntity($puzzle), $puzzles),

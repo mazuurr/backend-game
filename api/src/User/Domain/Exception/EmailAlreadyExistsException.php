@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\User\Domain\Exception;
 
-class EmailAlreadyExistsException extends \DomainException
+use App\Shared\Domain\Exception\DomainException;
+
+class EmailAlreadyExistsException extends DomainException
 {
     public function __construct(string $message = 'Email already exists.')
     {
-        parent::__construct($message);
+        parent::__construct($message, self::HTTP_CONFLICT);
     }
 }

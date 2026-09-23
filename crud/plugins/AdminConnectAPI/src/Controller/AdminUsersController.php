@@ -12,7 +12,6 @@ class AdminUsersController extends AppController
         $filters = [
             'search'   => $this->request->getQuery('search', ''),
             'active'   => $this->request->getQuery('active', ''),
-            'premium'  => $this->request->getQuery('premium', ''),
             'page'     => (int) $this->request->getQuery('page', 1),
             'per_page' => (int) $this->request->getQuery('per_page', 20),
         ];
@@ -40,7 +39,6 @@ class AdminUsersController extends AppController
                 'username' => $data['username'],
                 'email'    => $data['email'],
                 'password' => $data['password'],
-                'premium'  => !empty($data['premium']),
                 'active'   => !empty($data['active']),
             ]);
             if ($this->api->isSuccess($response)) {
